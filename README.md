@@ -1,32 +1,6 @@
 # UnityMeshSimplifier
 
-[![openupm](https://img.shields.io/npm/v/com.whinarn.unitymeshsimplifier?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.whinarn.unitymeshsimplifier/)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3c6b55bddfe64912b56e6759c642939d)](https://www.codacy.com/manual/Whinarn/UnityMeshSimplifier?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Whinarn/UnityMeshSimplifier&amp;utm_campaign=Badge_Grade)
-[![CircleCI](https://img.shields.io/circleci/build/gh/Whinarn/UnityMeshSimplifier?label=circle-ci)](https://circleci.com/gh/Whinarn/UnityMeshSimplifier/tree/master)
-[![GitHub Release Status](https://img.shields.io/github/workflow/status/Whinarn/UnityMeshSimplifier/Release?label=release)](https://github.com/Whinarn/UnityMeshSimplifier/actions?query=workflow%3ARelease)
-[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/Whinarn/UnityMeshSimplifier/blob/master/LICENSE.md)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-Mesh simplification for [Unity](https://unity3d.com/). The project is deeply based on the [Fast Quadric Mesh Simplification](https://github.com/sp4cerat/Fast-Quadric-Mesh-Simplification) algorithm, but rewritten entirely in C# and released under the MIT license.
-
-Because of the fact that this project is entirely in C# it *should* work on all platforms that Unity officially supports, as well as both in the editor and at runtime in builds.
-
-## Up for adoption
-
-Hello there! Are you interested in mesh simplification and would like to take this package further?
-
-I'm currently looking for someone to take over this repository since I feel like I'm not the right person to do it, nor do I have enough time to spend on it. Or if you'd just like to be a maintainer. Preferably someone with a better knowledge and interest in mesh simplification.
-
-If you think that's you or your organization, please open up an issue to start a discussion.
-
-## Compatibility
-
-Because this project is now using Unity packages, you should use a Unity version from 2018.1 and beyond.
-Although some scripts have been tested and confirmed working as far back as Unity 5.6, it will no longer be officially supported.
-Unity introduced the package manager in Unity 2017.2, but at a very early state.
-
-The code will only (at the time of writing) compile with the *.NET Standard 2.0* or *.NET 4.X* scripting runtime versions. The legacy scripting runtime is no longer supported.
-Read more about this [here](https://docs.unity3d.com/2019.1/Documentation/Manual/dotnetProfileSupport.html).
 
 ## Installation into Unity project
 
@@ -43,6 +17,83 @@ For programmers you will find documentation for the [Mesh Simplifier API](https:
 In order to solve artifacts in the mesh simplification process where holes or other serious issues could arise, a new feature called smart linking has been introduced. This feature is enabled by default but can be disabled through the `EnableSmartLink` field on the `SimplificationOptions` struct appled to the `MeshSimplifier` class through the `SimplificationOptions` property. Disabling this could give you a minor performance gain in cases where you do not need this.
 
 The `VertexLinkDistance` field on the `SimplificationOptions` struct could be also be used to change the maximum distance between two vertices for the linking. The default value is `double.Epsilon`. This value maximum distance is intended to be very small, but you might need to increase it for large scale meshes.
+
+
+
+
+Reducing Mesh Poly Count
+------------------------
+
+To reduce the vertex count of a game object containing a mesh renderer and a mesh filter, you just need to invoke the **Mesh Simplifier API** on the mesh itself.
+
+Ideally, you can develop a custom inspector to make this poly count reduction.
+
+You can do that.
+
+But for this example I will merely prototype an OnGUI function so you can see how the mesh reduction works in run-time.
+
+Here's my code\:
+
+    void OnGUI()
+    {
+        if (GUI.Button(Rect.MinMaxRect(0, 0, 200, 200),"Simplify Mesh"))
+        {
+            var originalMesh = GetComponent().sharedMesh;
+            float quality = 0.2f;
+            var meshSimplifier = new UnityMeshSimplifier.MeshSimplifier();
+            meshSimplifier.Initialize(originalMesh);
+            meshSimplifier.SimplifyMesh(quality);
+            var destMesh = meshSimplifier.ToMesh();
+            GetComponent().sharedMesh = destMesh;
+        }
+    }
+
+
+See what happens next:
+
+![](Unity-Mesh-Simplifier-Example.gif)
+
+_Unity Mesh Simplifier Example_
+
+At quality 0.2, we reduced the vertex count of this sample mesh from 7k to 2.5k... in run-time.
+
+_lower quality = lower poly count = worse visuals = louder LOLs = higher performance_
+
+It works fairly well for reductions with _quality_ above 0.5. Below that number, your mesh will start breaking apart.
+
+
+[insert video here]
+
+Code used in video
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+public class MeshSimplify : MonoBehaviour
+{
+    public float quality = 0.5f;
+
+
+    void OnGUI()
+    {
+           if (GUI.Button(Rect.MinMaxRect(0, 0, 200, 200),"Simplify Mesh"))
+           {
+                var originalMesh = GetComponent<MeshFilter>().sharedMesh;
+                var meshSimplifier = new UnityMeshSimplifier.MeshSimplifier();
+                meshSimplifier.Initialize(originalMesh);
+                meshSimplifier.SimplifyMesh(quality);
+                var destMesh = meshSimplifier.ToMesh();
+                GetComponent<MeshFilter>().sharedMesh = destMesh;
+           }
+    }
+}
+```
+
+
 
 ## Potential problems and solutions
 
@@ -66,7 +117,3 @@ The most probable cause for this is that you have objects that are parented unde
 ### The Unity-generated Visual Studio solution file appears broken
 
 This can be a problem because of an assembly definition provided with this repository, if you are using Unity 2017.3 or above. Make sure that you have the latest version of [Visual Studio Tools for Unity](https://www.visualstudio.com/vs/unity-tools/). If you are using Visual Studio 2017, make sure that Visual Studio is up to date and that you have installed the *Game development with Unity* component. For other versions of Visual Studio you would have to download a separate installer. Please go to the [Microsoft Documentation](https://docs.microsoft.com/en-us/visualstudio/cross-platform/getting-started-with-visual-studio-tools-for-unity) for more information.
-
-## How to contribute
-
-Please read [CONTRIBUTING](https://github.com/Whinarn/UnityMeshSimplifier/blob/master/CONTRIBUTING.md) regarding how to contribute.
