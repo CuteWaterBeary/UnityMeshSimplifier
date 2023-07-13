@@ -1,22 +1,15 @@
 {
-  "name": "com.whinarn.unitymeshsimplifier",
-  "displayName": "Unity Mesh Simplifier",
-  "version": "3.1.0",
-  "unity": "2018.1",
-  "description": "Simplifies 3D meshes with ease. Works both in the editor and during runtime in builds.",
-  "type": "library",
-  "keywords": [
-    "3d",
-    "mesh",
-    "polygon",
-    "triangle",
-    "simplification",
-    "decimation",
-    "reduction",
-    "optimization"
-  ],
+  "name": "cute.waterbeary.meshsimplifier",
+  "displayName": "💜 Mesh Simplifier",
+  "version": "3.1.1",
+  "description": "Simplify and generate LODs for meshes.",
+  "gitDependencies": {},
+  "vpmDependencies": {},
   "author": {
-    "name": "Mattias Edlund",
-    "url": "https://github.com/Whinarn"
-  }
+    "name": "CuteWaterBeary",
+    "email": "original.vr.creator@gmail.com",
+    "url": "https://discord.gg/RjCae4XZCX"
+  },
+  "legacyFolders": {},
+  "legacyFiles": {}
 }

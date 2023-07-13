@@ -1,0 +1,70 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: vcc_packaging
+
+env:
+  packageName: "cute.waterbeary.meshsimplifier"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
+        with:
+            path: "package.json"
+            prop_path: "version"
+
+      - name: Set Environment Variables
+        run: |
+          echo "zipFile=${{ env.packageName }}-${{ steps.version.outputs.prop }}".zip >> $GITHUB_ENV
+          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV
+
+      - name: Create Zip
+        uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
+        with:
+          type: "zip"
+          # directory: "/"
+          filename: "${{env.zipFile}}"
+
+      - run: find *.meta >> metaList
+
+      - name: Create UnityPackage
+        uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
+        with:
+          package-path: ${{ env.unityPackage }}
+          include-files: metaList
+
+      - name: Make Github Release
+        uses: CuteWaterBeary/action-gh-release@ff6ab387db4b6c9821451da4521b6089e74e2168
+
+        with:
+
+          # Tag under which to release
+          tag_name: ${{ steps.version.outputs.prop }}
+
+          # Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.
+          generate_release_notes: true
+
+          # Append to body instead of overwriting
+          append_body: false
+
+          # "Newline-delimited list of path globs for asset files to upload"
+          files: |
+            ${{ env.zipFile }}
+            ${{ env.unityPackage }}
+
+          overwrite_files: true
+
+          fail_on_unmatched_files: true
