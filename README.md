@@ -62,7 +62,11 @@ _lower quality = lower poly count = worse visuals = louder LOLs = higher perform
 It works fairly well for reductions with _quality_ above 0.5. Below that number, your mesh will start breaking apart.
 
 
-[insert video here]
+
+
+https://github.com/CuteWaterBeary/UnityMeshSimplifier/assets/103973703/b9457d9e-2258-4f81-a310-23589fb1cba1
+
+
 
 Code used in video
 
